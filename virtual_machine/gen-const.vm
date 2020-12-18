@@ -1,0 +1,13 @@
+RESET a 
+INC a
+SHL a
+SHL a
+SHL a
+SHL a
+INC a
+SHL a
+SHL a
+INC a
+STORE a a
+PUT a
+HALT

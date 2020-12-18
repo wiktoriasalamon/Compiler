@@ -1,0 +1,11 @@
+RESET a     (a <- 0)
+GET a       (p[0] <- read n)
+LOAD a a
+RESET b     (b <- 0)
+INC b       (b <- 1)
+GET b       (p[1] <- 1)
+LOAD b b
+ADD a b
+STORE a a
+PUT a
+HALT
