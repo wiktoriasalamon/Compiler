@@ -1,0 +1,34 @@
+RESET a     (a <- 0)
+GET a       (p[0] <- read n)
+LOAD a a
+RESET b     (b <- 0)
+INC b       (b <- 1)
+GET b       (p[1] <- 1)
+LOAD b b
+JZERO b 26  (if b==0 return)
+RESET e     (e <- 0)
+RESET c     
+INC c       (c <- 1)
+RESET f     (start while-loop)
+ADD f b     (f <- b)
+INC f       
+SUB f a     (f <- b - a + 1)
+JZERO f 2   (if a > b)
+JUMP 4
+SHL b
+SHL c
+JUMP -8     (back to while-loop)
+RESET f     (start do-while-loop)
+ADD f b     (f <- b)
+SUB f a     (f <- b - a)
+JZERO f 2   (if a >= b)
+JUMP 3
+SUB a b
+ADD e c
+SHR b
+SHR c
+JZERO c 2   (if c==0 return)
+JUMP -10    (back to do-while-loop)
+STORE e e
+PUT e
+HALT

@@ -1,0 +1,38 @@
+RESET a     (a <- 0)
+GET a       (p[0] <- read n)
+LOAD a a
+RESET b     (b <- 0)
+INC b       (b <- 1)
+GET b       (p[1] <- 1)
+LOAD b b
+JZERO b 30
+RESET e     (e <- 0)
+RESET c     (start loop)
+INC c       (c <- 1)
+RESET d     
+ADD d b     (d <- b)
+RESET f
+ADD f a     (f <- a)
+SUB f d     (f <- a - d)
+JZERO f 4   (if a < d)
+SHL d
+SHL c
+JUMP -6
+SHR d
+SHR c
+SUB a d
+ADD e c
+RESET f
+ADD f a     (f <- a)
+SUB f b     (f <- a - b)
+JZERO f 2   (if a =< b)
+JUMP -19
+RESET f
+ADD f b     (f <- b)
+SUB f a     (f <- b - a)
+JZERO f 2   (if a => b)
+JUMP 2
+INC e
+STORE e e
+PUT e
+HALT

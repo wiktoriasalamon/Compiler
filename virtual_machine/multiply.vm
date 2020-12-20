@@ -1,0 +1,18 @@
+RESET a     (a <- 0)
+GET a       (p[0] <- read n // sprawdz czy n lub m ==0)
+LOAD a a
+RESET b     (b <- 0)
+INC b       (b <- 1)
+GET b       (p[1] <- 1)
+LOAD b b
+RESET c     (c <- 0)
+JODD b 2
+JUMP 2
+ADD c a
+SHL a
+SHR b
+JZERO b 2
+JUMP -6 (do jodd)
+STORE c c
+PUT c
+HALT
