@@ -1,7 +1,7 @@
 from sly import Lexer
 
 
-class CompilerLexer(Lexer):
+class CompilerLex(Lexer):
     tokens = {
         DECLARE, BEGIN, END,
 
@@ -16,33 +16,34 @@ class CompilerLexer(Lexer):
         EQUALS, NOT_EQUALS, LESS_THAN, GREATER_THAN,
         LESS_EQUALS, GREATER_EQUALS,
 
-        COLON, LEFT_PAREN, RIGHT_PAREN,
+        COLON, SEMICOLON, COMMA,
+        LEFT_PAREN, RIGHT_PAREN,
         ASSIGN,
 
         PIDENTIFIER, NUMBER
     }
 
+    ENDIF = r'ENDIF'
+    IF = r'IF'
+    THEN = r'THEN'
+    ELSE = r'ELSE'
+
+    DOWNTO = r'DOWNTO'
+    ENDFOR = r'ENDFOR'
+    FOR = r'FOR'
+    FROM = r'FROM'
+    TO = r'TO'
+
+    ENDWHILE = r'ENDWHILE'
+    WHILE = r'WHILE'
+    DO = r'DO'
+
     DECLARE = r'DECLARE'
     BEGIN = r'BEGIN'
     END = r'END'
 
-    IF = r'IF'
-    THEN = r'THEN'
-    ELSE = r'ELSE'
-    ENDIF = r'ENDIF'
-
-    WHILE = r'WHILE'
-    DO = r'DO'
-    ENDWHILE = r'ENDWHILE'
-
     REPEAT = r'REPEAT'
     UNTIL = r'UNTIL'
-
-    FOR = r'FOR'
-    FROM = r'FROM'
-    TO = r'TO'
-    DOWNTO = r'DOWNTO'
-    ENDFOR = r'ENDFOR'
 
     READ = r'READ'
     WRITE = r'WRITE'
@@ -62,6 +63,8 @@ class CompilerLexer(Lexer):
 
     ASSIGN = r':='  # MUST APPEAR FIRST! (LONGER)
     COLON = r':'
+    SEMICOLON = r';'
+    COMMA = r','
     LEFT_PAREN = r'\('
     RIGHT_PAREN = r'\)'
 
