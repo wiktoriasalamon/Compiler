@@ -1,5 +1,5 @@
 import argparse
-from lexer import CompilerLex
+from lexer import CompilerLexer
 
 
 def parse_arguments():

@@ -1,7 +1,7 @@
 from sly import Lexer
 
 
-class CompilerLex(Lexer):
+class CompilerLexer(Lexer):
     tokens = {
         DECLARE, BEGIN, END,
 
