@@ -30,7 +30,6 @@ class CompilerParser(Parser):
     @_('declarations COMMA PIDENTIFIER LEFT_PAREN NUMBER COLON NUMBER RIGHT_PAREN')
     def declarations(self, p):
         p[0] = list(p[0]) if p[0] else []
-        # TODO: check indexes
         p[0].append(Arr(p[2], p.lineno, p[4], p[6]))
         return p[0]
 
@@ -40,7 +39,6 @@ class CompilerParser(Parser):
 
     @_('PIDENTIFIER LEFT_PAREN NUMBER COLON NUMBER RIGHT_PAREN')
     def declarations(self, p):
-        # TODO: check indexes
         return list((Arr(p[0], p.lineno, p[2], p[4]),))
 
     # ---------------- COMMANDS ----------------
@@ -151,8 +149,8 @@ class CompilerParser(Parser):
 
     @_('PIDENTIFIER LEFT_PAREN PIDENTIFIER RIGHT_PAREN')
     def identifier(self, p):
-        return [p[0], p[2]]
+        return ArrElem(p[0], p.lineno, p[2])
 
     @_('PIDENTIFIER LEFT_PAREN NUMBER RIGHT_PAREN')
     def identifier(self, p):
-        return [p[0], p[2]]
+        return ArrElem(p[0], p.lineno, p[2])

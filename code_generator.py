@@ -4,6 +4,7 @@ class CodeGenerator:
         self.code = ''
 
     def gen_const(self, reg, num):
+        self.code += f'(generate {num})\n'
         gen_const_code = ''
         while num != 0:
             if num % 2 == 0:
@@ -18,10 +19,12 @@ class CodeGenerator:
     def assign_value(self, help_reg1, help_reg2, mem_index, value):
         self.gen_const(help_reg1, mem_index)
         self.gen_const(help_reg2, value)
+        self.code += f'(Store {value} in memory cell {mem_index})\n'
         self.code += f"STORE {help_reg2} {help_reg1}\n"
 
     def assign_value_from_register(self, reg_with_value, help_reg, mem_index):
         self.gen_const(help_reg, mem_index)
+        self.code += f'(Store value from register {reg_with_value} in memory cell {mem_index})\n'
         self.save_val(help_reg, reg_with_value)
 
     def load_var(self, mem_index, reg):

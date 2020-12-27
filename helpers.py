@@ -27,6 +27,16 @@ class Arr:
         return f"{self.name}({self.start}:{self.end})"
 
 
+class ArrElem:
+    def __init__(self, arr_name, line, index):
+        self.arr_name = arr_name
+        self.line = line
+        self.index = index
+
+    def __repr__(self):
+        return f"{self.arr_name}({self.index})"
+
+
 class Assign:
     def __init__(self, var: Var, expr, line):
         self.var = var
