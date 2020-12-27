@@ -1,12 +1,13 @@
 import argparse
 from lexer import CompilerLexer
 from parser import CompilerParser
+from compiler import Compiler
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Compiler')
     parser.add_argument(
-        '--infile',
+        'infile',
         type=argparse.FileType('r'),
         help='.imp file containing code'
     )
@@ -23,24 +24,17 @@ def start_compiler(input_file, output_file):
     print(input_file, output_file)
     lexer = CompilerLexer()
 
-
     with open(input_file, 'r') as file:
         code = file.read()
-        tokens = lexer.tokenize(code)
-        parser = CompilerParser()
-        parsed_code = parser.parse(tokens)
 
-        print(parsed_code)
+    tokens = lexer.tokenize(code)
+    parser = CompilerParser()
+    tree = parser.parse(tokens)
+    compiler = Compiler(tree)
+    code = compiler.compile()
 
-        '''      for t in tokens:
-            print(t)'''
-
-
-        '''with open(output_file, 'w') as file:
-            tokens = lexer.tokenize(code)
-            for t in tokens:
-                #file.write(str(t)+"\n")
-                print(t)'''
+    with open(output_file, 'w') as file:
+        file.write(code)
 
 
 def main():
