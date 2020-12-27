@@ -1,0 +1,29 @@
+RESET a
+INC a
+RESET b
+INC b
+SHL b
+INC b
+SHL b
+INC b
+SHL b
+SHL b
+INC b
+STORE b a
+RESET a
+INC a
+LOAD a a
+RESET b
+INC b
+SHL b
+INC b
+ADD a b
+RESET b
+INC b
+SHL b
+STORE a b
+RESET a
+INC a
+SHL a
+PUT a
+HALT
