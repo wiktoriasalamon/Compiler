@@ -1,8 +1,5 @@
 from sly import Parser
 from lexer import CompilerLexer
-from variables import Variable, Integer, Array
-from ast import *
-
 
 class CompilerParser(Parser):
     tokens = CompilerLexer.tokens
@@ -48,30 +45,32 @@ class CompilerParser(Parser):
     @_('declarations COMMA PIDENTIFIER')
     def declarations(self, p):
         p[0] = list(p[0]) if p[0] else []
-        var = Integer(name=p[2], line=p.lineno)
-        self.declare_variable(var)
-        p[0].append(var)
+        #var = Integer(name=p[2], line=p.lineno)
+        #self.declare_variable(var)
+        #p[0].append(var)
+        p[0].append(p[2])
         return p[0]
 
     @_('declarations COMMA PIDENTIFIER LEFT_PAREN NUMBER COLON NUMBER RIGHT_PAREN')
     def declarations(self, p):
         p[0] = list(p[0]) if p[0] else []
-        arr = Array(name=p[2], line=p.lineno, start_index=p[4], end_index=p[6])
-        self.declare_variable(arr)
-        p[0].append(arr)
+        #arr = Array(name=p[2], line=p.lineno, start_index=p[4], end_index=p[6])
+        #self.declare_variable(arr)
+        #p[0].append(arr)
+        p[0].append([p[2], p[4], p[6]])
         return p[0]
 
     @_('PIDENTIFIER')
     def declarations(self, p):
-        var = Integer(name=p[0], line=p.lineno)
-        self.declare_variable(var)
+        #var = Integer(name=p[0], line=p.lineno)
+        #self.declare_variable(var)
         return list((p[0],))
 
     @_('PIDENTIFIER LEFT_PAREN NUMBER COLON NUMBER RIGHT_PAREN')
     def declarations(self, p):
-        arr = Array(name=p[0], line=p.lineno, start_index=p[2], end_index=p[4])
-        self.declare_variable(arr)
-        return list((p[0],))
+        #arr = Array(name=p[0], line=p.lineno, start_index=p[2], end_index=p[4])
+        #self.declare_variable(arr)
+        return list(([p[0], p[2], p[4]],))
 
     # ---------------- COMMANDS ----------------
 
@@ -90,138 +89,125 @@ class CompilerParser(Parser):
     @_('identifier ASSIGN expression SEMICOLON')
     def command(self, p):
         try:
-            self.get_variable(name=p.identifier, line=p.lineno)
-            return "assign", p.identifier, p.expression
+            #self.get_variable(name=p.identifier, line=p.lineno)
+            #return "assign", p.identifier, p.expression
+            return [p[0], ':=', p[2]]
         except Exception as e:
             print(e)
             pass
 
     @_('IF condition THEN commands ELSE commands ENDIF')
     def command(self, p):
-        # TODO
-        pass
+        return ["if", p[1], 'then', p[3], 'else', p[5], 'endif']
 
     @_('IF condition THEN commands ENDIF')
     def command(self, p):
-        # TODO
-        pass
+        return ["if", p[1], 'then', p[3], 'endif']
 
     @_('WHILE condition DO commands ENDWHILE')
     def command(self, p):
-        # TODO
-        pass
+        return ["while", p[1], 'do', p[3], 'endwhile']
 
     @_('REPEAT commands UNTIL condition SEMICOLON')
     def command(self, p):
-        # TODO
-        pass
+        return ["repeat", p[1], 'until', p[3], ';']
 
     @_('FOR PIDENTIFIER FROM value TO value DO commands ENDFOR')
     def command(self, p):
-        # TODO
-        pass
+        return ["for", p[1], 'from', p[3], "to", p[5], 'do', p[7], 'endfor']
 
     @_('FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR')
     def command(self, p):
-        # TODO
-        pass
+        return ["for", p[1], 'from', p[3], "downto", p[5], 'do', p[7], 'endfor']
 
     @_('READ identifier SEMICOLON')
     def command(self, p):
-        # TODO
-        pass
+        return ['read', p[1]]
 
     @_('WRITE value SEMICOLON')
     def command(self, p):
-        return Print(p[1])
+        return ['write', p[1]]
 
     # ---------------- EXPRESSION ----------------
 
     @_('value')
     def expression(self, p):
-        return Number(p[0])
+        return p[0]
 
     @_('value PLUS value')
     def expression(self, p):
         #  return p[0] + p[2]
-        return Sum(p[0], p[2])
+        return [p[0], '+', p[2]]
 
     @_('value MINUS value')
     def expression(self, p):
         # return p[0] - p[2]
-        return Sub(p[0], p[2])
+        return [p[0], '-', p[2]]
 
     @_('value TIMES value')
     def expression(self, p):
         # return p[0] * p[2]
-        return Mul(p[0], p[2])
+        return [p[0], '*', p[2]]
 
     @_('value DIVIDE value')
     def expression(self, p):
         # return p[0] / p[2]
-        return Div(p[0], p[2])
+        return [p[0], '/', p[2]]
+
 
     @_('value MODULO value')
     def expression(self, p):
         # return p[0] % p[2]
-        return Mod(p[0], p[2])
+        return [p[0], '%', p[2]]
+
 
     # ---------------- CONDITION ----------------
 
     @_('value EQUALS value')
     def condition(self, p):
-        # TODO
-        pass
+        return [p[0], '=', p[2]]
 
     @_('value NOT_EQUALS value')
     def condition(self, p):
-        # TODO
-        pass
+        return [p[0], '!=', p[2]]
 
     @_('value LESS_THAN value')
     def condition(self, p):
-        # TODO
-        pass
+        return [p[0], '<', p[2]]
+
 
     @_('value GREATER_THAN value')
     def condition(self, p):
-        # TODO
-        pass
+        return [p[0], '>', p[2]]
 
     @_('value LESS_EQUALS value')
     def condition(self, p):
-        # TODO
-        pass
+        return [p[0], '<=', p[2]]
 
     @_('value GREATER_EQUALS value')
     def condition(self, p):
-        # TODO
-        pass
+        return [p[0], '>=', p[2]]
 
     # ---------------- VALUE ----------------
 
     @_('NUMBER')
     def value(self, p):
-        return "num", p.NUMBER
+        return p[0]
 
     @_('identifier')
     def value(self, p):
-        # TODO
-        return p.identifier
+        return p[0]
 
     # ---------------- IDENTIFIER ----------------
 
     @_('PIDENTIFIER')
     def identifier(self, p):
-        # TODO
-        return 'var', p.PIDENTIFIER
+        return p[0]
 
     @_('PIDENTIFIER LEFT_PAREN PIDENTIFIER RIGHT_PAREN')
     def identifier(self, p):
-        # TODO
-        pass
+        return [p[0],p[2]]
 
     @_('PIDENTIFIER LEFT_PAREN NUMBER RIGHT_PAREN')
     def identifier(self, p):
-        # TODO
-        pass
+        return [p[0],p[2]]
