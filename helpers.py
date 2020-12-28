@@ -1,15 +1,8 @@
-class Number:
-    def __init__(self, value):
-        self.value = value
-
-    def __repr__(self):
-        return self.value
-
-
 class Var:
     def __init__(self, name, line):
         self.name = name
         self.line = line
+        self.is_initialized = False
 
     def __repr__(self):
         return self.name
@@ -22,6 +15,7 @@ class Arr:
         self.start = start
         self.end = end
         self.length = int(end) - int(start) + 1
+        self.elements = []
 
     def __repr__(self):
         return f"{self.name}({self.start}:{self.end})"
@@ -32,9 +26,11 @@ class ArrElem:
         self.arr_name = arr_name
         self.line = line
         self.index = index
+        self.is_initialized = False
 
     def __repr__(self):
         return f"{self.arr_name}({self.index})"
+
 
 
 class Assign:

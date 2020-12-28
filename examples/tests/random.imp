@@ -1,0 +1,7 @@
+DECLARE
+    j, tab(2:7), i
+BEGIN
+    j:= tab(5) + 6;
+    tab(3):= 69;
+    WRITE j;
+END

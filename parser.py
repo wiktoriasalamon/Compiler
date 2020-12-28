@@ -145,11 +145,11 @@ class CompilerParser(Parser):
 
     @_('PIDENTIFIER')
     def identifier(self, p):
-        return p[0]
+        return Var(p[0], p.lineno)
 
     @_('PIDENTIFIER LEFT_PAREN PIDENTIFIER RIGHT_PAREN')
     def identifier(self, p):
-        return ArrElem(p[0], p.lineno, p[2])
+        return ArrElem(p[0], p.lineno, Var(p[2], p.lineno))
 
     @_('PIDENTIFIER LEFT_PAREN NUMBER RIGHT_PAREN')
     def identifier(self, p):

@@ -12,3 +12,7 @@ class InvalidArrayRange(Exception):
 
 class VariableIndexError(Exception):
     pass
+
+
+class VariableNotInitialized(Exception):
+    pass
