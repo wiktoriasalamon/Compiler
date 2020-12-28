@@ -42,14 +42,70 @@ class CodeGenerator:
     def subtract(self, reg1, reg2):
         self.code += f"SUB {reg1} {reg2}\n"
 
-    def divide(self):
-        print('divide')
+    def divide(self, reg1, reg2, reg3, reg4, reg5):
+        self.code += f"RESET {reg4} \n" \
+                     f"JZERO {reg2} 23 \n" \
+                     f"RESET {reg3} \n" \
+                     f"INC {reg3} \n" \
+                     f"RESET {reg5} \n" \
+                     f"ADD {reg5} {reg2} \n" \
+                     f"INC {reg5} \n" \
+                     f"SUB {reg5} {reg1} \n" \
+                     f"JZERO {reg5} 2 \n" \
+                     f"JUMP 4 \n" \
+                     f"SHL {reg2} \n" \
+                     f"SHL {reg3} \n" \
+                     f"JUMP -8 \n" \
+                     f"RESET {reg5} \n" \
+                     f"ADD {reg5} {reg2} \n" \
+                     f"SUB {reg5} {reg1} \n" \
+                     f"JZERO {reg5} 2 \n" \
+                     f"JUMP 3 \n" \
+                     f"SUB {reg1} {reg2} \n" \
+                     f"ADD {reg4} {reg3} \n" \
+                     f"SHR {reg2} \n" \
+                     f"SHR {reg3} \n" \
+                     f"JZERO {reg3} 2 \n" \
+                     f"JUMP -10"
+        self.copy(reg4, reg1)
 
-    def modulo(self):
-        print('modulo')
+    def modulo(self, reg1, reg2, reg3, reg4, reg5):
+        self.code += f"JZERO {reg2} 24 \n" \
+                     f"RESET {reg4} \n" \
+                     f"RESET {reg3} \n" \
+                     f"INC {reg3} \n" \
+                     f"RESET {reg5} \n" \
+                     f"ADD {reg5} {reg2} \n" \
+                     f"INC {reg5} \n" \
+                     f"SUB {reg5} {reg1} \n" \
+                     f"JZERO {reg5} 2 \n" \
+                     f"JUMP 4 \n" \
+                     f"SHL {reg2} \n" \
+                     f"SHL {reg3} \n" \
+                     f"JUMP -8 \n" \
+                     f"RESET {reg5} \n" \
+                     f"ADD {reg5} {reg2} \n" \
+                     f"SUB {reg5} {reg1} \n" \
+                     f"JZERO {reg5} 2 \n" \
+                     f"JUMP 3 \n" \
+                     f"SUB {reg1} {reg2} \n" \
+                     f"ADD {reg4} {reg3} \n" \
+                     f"SHR {reg2} \n" \
+                     f"SHR {reg3} \n" \
+                     f"JZERO {reg3} 3 \n" \
+                     f"JUMP -10\n" \
+                     f"RESET {reg1}"
 
-    def multiply(self):
-        print('multiply')
+    def multiply(self, reg1, reg2, reg3):
+        self.code += f"RESET {reg3}\n" \
+                     f"JODD {reg2} 2\n" \
+                     f"JUMP 2\n" \
+                     f"ADD {reg3} {reg1}" \
+                     f"SHL {reg1}\n" \
+                     f"SHR {reg2}\n" \
+                     f"JZERO {reg2} 2\n" \
+                     f"JUMP -6\n"
+        self.copy(reg3, reg1)
 
     def write(self, reg):
         self.code += f"PUT {reg}\n"

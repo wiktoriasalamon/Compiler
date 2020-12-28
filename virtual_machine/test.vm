@@ -1,42 +1,101 @@
-(generate 5)
+(generate 2)
 RESET a
 INC a
 SHL a
-SHL a
-INC a
-LOAD a a
-(generate 6)
-RESET b
-INC b
-SHL b
-INC b
-SHL b
-ADD a b
+GET a
 (generate 1)
+RESET a
+INC a
+GET a
+(generate 2)
+RESET a
+INC a
+SHL a
+LOAD a a
+(generate 1)
+RESET c
+INC c
+LOAD c c
+RESET e 
+JZERO c 23 
+RESET d 
+INC d 
+RESET f 
+ADD f c 
+INC f 
+SUB f a 
+JZERO f 2 
+JUMP 4 
+SHL c 
+SHL d 
+JUMP -8 
+RESET f 
+ADD f c 
+SUB f a 
+JZERO f 2 
+JUMP 3 
+SUB a c 
+ADD e d 
+SHR c 
+SHR d 
+JZERO d 2 
+JUMP -10RESET a
+ADD a e
+(generate 3)
 RESET b
 INC b
-(Store value from register a in memory cell 1)
+SHL b
+INC b
+STORE a b
+(generate 2)
+RESET a
+INC a
+SHL a
+LOAD a a
+(generate 1)
+RESET c
+INC c
+LOAD c c
+JZERO c 24 
+RESET e 
+RESET d 
+INC d 
+RESET f 
+ADD f c 
+INC f 
+SUB f a 
+JZERO f 2 
+JUMP 4 
+SHL c 
+SHL d 
+JUMP -8 
+RESET f 
+ADD f c 
+SUB f a 
+JZERO f 2 
+JUMP 3 
+SUB a c 
+ADD e d 
+SHR c 
+SHR d 
+JZERO d 3 
+JUMP -10
+RESET a(generate 4)
+RESET b
+INC b
+SHL b
+SHL b
 STORE a b
 (generate 3)
 RESET a
 INC a
 SHL a
 INC a
-(generate 69)
-RESET b
-INC b
-SHL b
-SHL b
-SHL b
-SHL b
-INC b
-SHL b
-SHL b
-INC b
-(Store 69 in memory cell 3)
-STORE b a
-(generate 1)
+PUT a
+(generate 4)
 RESET a
 INC a
+SHL a
+SHL a
 PUT a
 HALT

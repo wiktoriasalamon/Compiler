@@ -1,18 +1,46 @@
 class VariableNotDeclared(Exception):
-    pass
+    def __init__(self, line, name):
+        self.message = f"Line {line}: Variable '{name}' is not declared"
+        super().__init__(self.message)
+
+
+class ArrayNotDeclared(Exception):
+    def __init__(self, line, name):
+        self.message = f"Line {line}: Array '{name}' is not declared"
+        super().__init__(self.message)
 
 
 class VariableAlreadyDeclared(Exception):
-    pass
+    def __init__(self, line, name):
+        self.message = f"Line {line}: Variable '{name}' was already declared"
+        super().__init__(self.message)
+
+
+class ArrayAlreadyDeclared(Exception):
+    def __init__(self, line, name):
+        self.message = f"Line {line}: Array '{name}' was already declared"
+        super().__init__(self.message)
 
 
 class InvalidArrayRange(Exception):
-    pass
+    def __init__(self, line, name):
+        self.message = f"Line {line}: Invalid range of array '{name}'"
+        super().__init__(self.message)
 
 
 class VariableIndexError(Exception):
-    pass
+    def __init__(self, line, name):
+        self.message = f"Line {line}: Niejawne użycie indeksu tablicy '{name}'"
+        super().__init__(self.message)
 
 
 class VariableNotInitialized(Exception):
-    pass
+    def __init__(self, line, name):
+        self.message = f"Line {line}: Variable '{name}' is not initialized"
+        super().__init__(self.message)
+
+
+class ArrayIndexOutOfRange(Exception):
+    def __init__(self, line, name):
+        self.message = f"Line {line}: Index of array '{name}' is out of range"
+        super().__init__(self.message)

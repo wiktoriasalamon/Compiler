@@ -1,7 +1,10 @@
 DECLARE
-    j, tab(2:7), i
+    j, i, k, l
 BEGIN
-    j:= tab(5) + 6;
-    tab(3):= 69;
-    WRITE j;
+    READ i;
+    READ j;
+    k := i / j;
+    l := i % j;
+    WRITE k;
+    WRITE l;
 END

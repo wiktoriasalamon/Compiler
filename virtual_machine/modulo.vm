@@ -5,6 +5,7 @@ RESET b     (b <- 0)
 INC b       (b <- 1)
 GET b       (p[1] <- 1)
 LOAD b b
+
 JZERO b 26  (if b==0 return)
 RESET e     (e <- 0)
 RESET c     
@@ -29,6 +30,7 @@ SHR b
 SHR c
 JZERO c 2   (if c==0 return)
 JUMP -10    (back to do-while-loop)
+
 STORE a a
 PUT a
 HALT

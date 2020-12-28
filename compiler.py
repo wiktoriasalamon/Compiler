@@ -9,70 +9,99 @@ class Compiler:
 
     def __init__(self, tree):
         self.variables = {}
-        self.memory_indexes = {}
+        self.arrays = {}
+        self.var_mem_indexes = {}
+        self.arr_mem_indexes = {}
         self.next_free_memory_index = 0
         self.g = CodeGenerator()
         self.tree = tree
 
-        self.memory_indexes[PUT_MEMORY_CELL] = self.next_free_memory_index
+        self.var_mem_indexes[PUT_MEMORY_CELL] = self.next_free_memory_index
         self.next_free_memory_index += 1
 
     def compile(self):
         self.walk_tree(self.tree)
         self.g.end_program()
 
-        print('---------------')
-        for i in self.memory_indexes.keys():
-            print(i, self.memory_indexes[i])
-
         return self.g.code
 
     def declare_variable(self, var):
-        # TODO może istnieć zmienna o tej samej nazwie co nazwa tablicy
-        if var.name in self.variables:
-            raise VariableAlreadyDeclared(f'Line {var.line}: Variable "{var.name}" was already declared')
-
-        if isinstance(var, Arr):
-            if int(var.start) > int(var.end):
-                raise InvalidArrayRange(f'Line {var.line}: Invalid range of array "{var.name}"')
-
-        self.variables[var.name] = var
-        self.memory_indexes[var.name] = self.next_free_memory_index
-
         if isinstance(var, Var):
+            if var.name in self.variables:
+                raise VariableAlreadyDeclared(var.line, var.name)
+
+            self.variables[var.name] = var
+            self.var_mem_indexes[var.name] = self.next_free_memory_index
             self.next_free_memory_index += 1
+
         elif isinstance(var, Arr):
+            if var.name in self.arrays:
+                raise ArrayAlreadyDeclared(var.line, var.name)
+
+            if int(var.start) > int(var.end):
+                raise InvalidArrayRange(var.line, var.name)
+
+            self.arrays[var.name] = var
+            self.arr_mem_indexes[var.name] = self.next_free_memory_index
             self.next_free_memory_index += var.length
 
         print('declare', var)
 
-    def get_variable(self, name, line):
-        if name not in self.variables:
-            # TODO: stop compilation or sth
-            raise VariableNotDeclared(f'Line {line}: Variable "{name}" is not declared')
+    def get_variable(self, var):
+        if isinstance(var, Var):
+            if var.name not in self.variables:
+                raise VariableNotDeclared(var.line, var.name)
+            else:
+                return self.variables[var.name]
+        if isinstance(var, ArrElem):
+            if var.arr_name not in self.arrays:
+                raise ArrayNotDeclared(var.line, var.arr_name)
+            else:
+                return self.arrays[var.arr_name]
 
-        return self.variables[name]
 
     def binary_op(self, operation: BinaryOp):
         print(operation)
 
     def assign(self, command: Assign):
-        mem_index = self.get_mem_index(command.var)
+
+        # save expr in register 'a'
         if isinstance(command.expr, BinaryOp):
+            # assign expression to variable
             result_of_expr_reg = 'a'
             second_operand_register = 'b'
             help_reg = 'c'
-            self.expression(result_of_expr_reg, second_operand_register, help_reg, command.expr)
-            self.g.assign_value_from_register(result_of_expr_reg, 'b', mem_index)
-        elif isinstance(command.expr, ArrElem) \
-                or isinstance(command.expr, Var):
+            self.expression(
+                command.expr
+            )
+        elif isinstance(command.expr, ArrElem):
+            # assign array element to variable
+            self.load_var_to_register(command.expr, 'a', 'b')
+        elif isinstance(command.expr, Var):
+            # assign variable to variable
             self.check_is_var_initialized(command.expr)
             expr_mem_index = self.get_mem_index(command.expr)
             self.g.load_var(expr_mem_index, 'a')
-            var_mem_index = self.get_mem_index(command.var)
-            self.g.assign_value_from_register('a', 'b', var_mem_index)
         else:
-            self.g.assign_value('a', 'b', mem_index, int(command.expr))
+            # assign constant to variable
+            self.g.gen_const('a', int(command.expr))
+
+        # get variable memory cell to register b
+        if isinstance(command.var, Var):
+            # var =
+            var_mem_index = self.get_mem_index(command.var)
+            self.g.gen_const('b', var_mem_index)
+        elif isinstance(command.var, ArrElem) \
+                and isinstance(command.var.index, Var):
+            # tab(i) =
+            self.get_memory_cell_to_reg(command.var, 'b', 'c')
+        else:
+            # tab(1) =
+            var_mem_index = self.get_mem_index(command.var)
+            self.g.gen_const('b', var_mem_index)
+
+        # save register a in memory cell stored in register b
+        self.g.save_val('b', 'a')
 
         self.initialize_var(command.var)
 
@@ -93,24 +122,25 @@ class Compiler:
         else:
             self.g.gen_const(register, int(var))
 
-    def expression(self, result_register, second_operand_reg, help_reg, expr: BinaryOp):
-        self.load_var_to_register(expr.left, result_register, help_reg)
-        self.load_var_to_register(expr.right, second_operand_reg, help_reg)
+    def expression(self, expr: BinaryOp):
+        self.load_var_to_register(expr.left, 'a', 'd')
+        self.load_var_to_register(expr.right, 'c', 'd')
+
         if expr.op == "+":
-            self.g.add(result_register, second_operand_reg)
+            self.g.add('a', 'c')
         elif expr.op == "-":
-            self.g.subtract(result_register, second_operand_reg)
+            self.g.subtract('a', 'c')
         elif expr.op == "*":
-            self.g.multiply()
+            self.g.multiply('a', 'c', 'd')
         elif expr.op == "/":
-            self.g.divide()
+            self.g.divide('a', 'c', 'd', 'e', 'f')
         elif expr.op == "%":
-            self.g.modulo()
+            self.g.modulo('a', 'c', 'd', 'e', 'f')
 
     def read(self, command: Read):
         if isinstance(command.var, ArrElem) \
                 and isinstance(command.var.index, Var):
-            var = self.get_variable(command.var.arr_name, command.line)
+            var = self.get_variable(command.var)
             self.get_memory_cell_to_reg(var, 'a', 'b')
         else:
             mem_index = self.get_mem_index(command.var)
@@ -119,12 +149,12 @@ class Compiler:
         self.initialize_var(command.var)
 
     def get_memory_cell_to_reg(self, var: ArrElem, register, help_reg):
-        arr_mem_index = self.memory_indexes[var.arr_name]
-        arr_id_mem_index = self.memory_indexes[var.index.name]
+        arr_mem_index = self.arr_mem_indexes[var.arr_name]
+        arr_id_mem_index = self.var_mem_indexes[var.index.name]
         self.g.gen_const(register, arr_mem_index)
         self.g.load_var(arr_id_mem_index, help_reg)
         self.g.add(register, help_reg)
-        arr_offset = self.variables[var.arr_name].start
+        arr_offset = self.arrays[var.arr_name].start
         self.g.gen_const(help_reg, arr_offset)
         self.g.subtract(register, help_reg)
 
@@ -132,7 +162,7 @@ class Compiler:
         self.check_is_var_initialized(command.value)
         if isinstance(command.value, str):  # command.value is number
             self.g.gen_const('a', int(command.value))
-            self.g.gen_const('b', self.memory_indexes[PUT_MEMORY_CELL])
+            self.g.gen_const('b', self.var_mem_indexes[PUT_MEMORY_CELL])
             self.g.save_val('b', 'a')
             self.g.write('b')
 
@@ -145,30 +175,32 @@ class Compiler:
 
     def initialize_var(self, var):
         if isinstance(var, Var):
-            v = self.get_variable(var.name, var.line)
+            v = self.get_variable(var)
             v.is_initialized = True
 
     def check_is_var_initialized(self, var):
         if isinstance(var, Var):
             v: Var
-            v = self.get_variable(var.name, var.line)
+            v = self.get_variable(var)
             if not v.is_initialized:
-                raise VariableNotInitialized(f'Line {var.line}: Variable "{var.name}" is not initialized')
+                raise VariableNotInitialized(var.line, var.name)
         else:
             return
 
     def get_mem_index(self, var):
         if isinstance(var, Var):
-            v = self.get_variable(var.name, var.line)
-            return self.memory_indexes[v.name]
+            v = self.get_variable(var)
+            return self.var_mem_indexes[v.name]
 
         if isinstance(var, ArrElem):
             if isinstance(var.index, Var):
-                raise VariableIndexError  # TODO ?????????
+                raise VariableIndexError(var.line, var.arr_name)  # TODO ????????? robie to w innym miejscu
             else:
                 elem_id = int(var.index)
-                arr = self.get_variable(var.arr_name, var.line)
-                arr_elem_mem_index = self.memory_indexes[arr.name] + elem_id - int(arr.start)
+                arr = self.get_variable(var)
+                if elem_id < int(arr.start) or elem_id > int(arr.end):
+                    raise ArrayIndexOutOfRange(var.line, var.arr_name)
+                arr_elem_mem_index = self.arr_mem_indexes[arr.name] + elem_id - int(arr.start)
                 return arr_elem_mem_index
 
     def walk_tree(self, node):
