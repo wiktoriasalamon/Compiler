@@ -4,6 +4,7 @@ STORE a a   (p[a]=0)
 RESET b 
 INC b
 STORE b b   (p[b]=1)
+
 RESET c     (c <- 0)
 INC c
 INC c

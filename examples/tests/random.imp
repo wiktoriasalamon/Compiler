@@ -1,10 +1,9 @@
 DECLARE
-    j, i, k, l
+    i
 BEGIN
     READ i;
-    READ j;
-    k := i / j;
-    l := i % j;
-    WRITE k;
-    WRITE l;
+    REPEAT
+        WRITE i;
+        i:=i-1;
+    UNTIL i=0;
 END

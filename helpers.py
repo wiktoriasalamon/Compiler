@@ -32,7 +32,6 @@ class ArrElem:
         return f"{self.arr_name}({self.index})"
 
 
-
 class Assign:
     def __init__(self, var: Var, expr, line):
         self.var = var
@@ -79,3 +78,74 @@ class Program:
 
     def __repr__(self):
         return f"[{self.declarations}, {self.commands}]"
+
+
+class Condition:
+    def __init__(self, left, op, right, line):
+        self.left = left
+        self.right = right
+        self.op = op
+        self.line = line
+
+    def __repr__(self):
+        return f"{self.left} {self.op} {self.right}"
+
+
+class IfThen:
+    def __init__(self, condition: Condition, commands, line):
+        self.condition = condition
+        self.commands = commands
+        self.line = line
+
+    def __repr__(self):
+        r = f"if {self.condition} then\n"
+        for c in self.commands:
+            r += f"{c}\n"
+        r += "endif"
+        return r
+
+
+class IfThenElse:
+    def __init__(self, condition: Condition, commands, else_commands, line):
+        self.condition = condition
+        self.commands = commands
+        self.else_commands = else_commands
+        self.line = line
+
+    def __repr__(self):
+        r = f"if {self.condition} then\n"
+        for c in self.commands:
+            r += f"{c}\n"
+        r += "else \n"
+        for ec in self.else_commands:
+            r += f"{ec}\n"
+        r += "endif"
+        return r
+
+
+class While:
+    def __init__(self, condition: Condition, commands, line):
+        self.condition = condition
+        self.commands = commands
+        self.line = line
+
+    def __repr__(self):
+        r = f"while {self.condition} do\n"
+        for c in self.commands:
+            r += f"{c}\n"
+        r += "endwhile"
+        return r
+
+
+class Repeat:
+    def __init__(self, condition: Condition, commands, line):
+        self.condition = condition
+        self.commands = commands
+        self.line = line
+
+    def __repr__(self):
+        r = f"repeat \n"
+        for c in self.commands:
+            r += f"{c}\n"
+        r = f"until {self.condition};\n"
+        return r

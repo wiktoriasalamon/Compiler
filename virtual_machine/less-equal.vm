@@ -5,10 +5,12 @@ RESET b     (b <- 0)
 INC b       (b <- 1)
 GET b       (p[1] <- read)
 LOAD b b
+
 RESET c
 ADD c a
 SUB c b     (c <- a - b)
 JZERO c 5
+
 RESET c     (write 0-false)
 STORE c c
 PUT c       

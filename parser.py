@@ -61,19 +61,19 @@ class CompilerParser(Parser):
 
     @_('IF condition THEN commands ELSE commands ENDIF')
     def command(self, p):
-        return ["if", p[1], 'then', p[3], 'else', p[5], 'endif']
+        return IfThenElse(p[1], p[3], p[5], p.lineno)
 
     @_('IF condition THEN commands ENDIF')
     def command(self, p):
-        return ["if", p[1], 'then', p[3], 'endif']
+        return IfThen(p[1], p[3], p.lineno)
 
     @_('WHILE condition DO commands ENDWHILE')
     def command(self, p):
-        return ["while", p[1], 'do', p[3], 'endwhile']
+        return While(p[1], p[3], p.lineno)
 
     @_('REPEAT commands UNTIL condition SEMICOLON')
     def command(self, p):
-        return ["repeat", p[1], 'until', p[3], ';']
+        return Repeat(p[3], p[1], p.lineno)
 
     @_('FOR PIDENTIFIER FROM value TO value DO commands ENDFOR')
     def command(self, p):
@@ -108,28 +108,13 @@ class CompilerParser(Parser):
     # ---------------- CONDITION ----------------
 
     @_('value EQUALS value')
-    def condition(self, p):
-        return [p[0], '=', p[2]]
-
     @_('value NOT_EQUALS value')
-    def condition(self, p):
-        return [p[0], '!=', p[2]]
-
     @_('value LESS_THAN value')
-    def condition(self, p):
-        return [p[0], '<', p[2]]
-
     @_('value GREATER_THAN value')
-    def condition(self, p):
-        return [p[0], '>', p[2]]
-
     @_('value LESS_EQUALS value')
-    def condition(self, p):
-        return [p[0], '<=', p[2]]
-
     @_('value GREATER_EQUALS value')
     def condition(self, p):
-        return [p[0], '>=', p[2]]
+        return Condition(p[0], p[1], p[2], p.lineno)
 
     # ---------------- VALUE ----------------
 

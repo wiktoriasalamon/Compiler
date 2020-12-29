@@ -5,6 +5,7 @@ RESET b     (b <- 0)
 INC b       (b <- 1)
 GET b       (p[1] <- 1)
 LOAD b b
+
 RESET c
 ADD c a
 SUB c b     (c <- a - b)
@@ -14,6 +15,7 @@ RESET c
 ADD c b
 SUB c a     (c <- b - a)
 JZERO c 5   (true)
+
 RESET c
 STORE c c
 PUT c       (write 0-false)

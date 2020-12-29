@@ -12,6 +12,7 @@ files = [
     'error6.imp',  # ??? my mamy niezadeklarowaną zmienną
     'error7.imp',  # podobnie jw
     'error8.imp',  # TODO (for)
+    'program2.imp',
 ]
 
 try:
