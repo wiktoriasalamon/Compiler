@@ -52,7 +52,7 @@ def run_test(tab, f, path):
         f.write(f"{t[0]} - ")
         if t[1]:
             try:
-                start_compiler(f'{path}{t[0]}', 'virtual_machine/test.vm')
+                start_compiler(f'{path}{t[0]}', 'tests/test.vm')
             except Exception as e:
                 print(f"{bcolors.FAIL}{e}{bcolors.ENDC}")
                 f.write(f"{e}")
@@ -87,7 +87,7 @@ def main():
     results_file = 'tests/results.txt'
     with open(my_results_file, 'w') as f:
         print_separator('TESTS')
-        run_test(files, f, 'programs/examples')
+        run_test(files, f, 'programs/examples/')
 
         print_separator('TESTS-LAB')
         run_test(files_lab, f, 'programs/tests_lab/')
