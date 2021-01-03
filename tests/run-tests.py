@@ -1,5 +1,5 @@
 import os
-from run import start_compiler
+from kompilator import start_compiler
 
 
 class bcolors:
@@ -28,7 +28,7 @@ files = [
     'program0.imp',
     'program0ns.imp',
     'program1.imp',
-    'program2.imp',  # ?????????????????????????????? 10: 2 1 5 1
+    'program2.imp',
     'tests/gebala/0-div-mod.imp',
     'tests/gebala/1-numbers.imp',
     'tests/gebala/2-fib.imp',

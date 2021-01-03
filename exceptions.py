@@ -36,7 +36,7 @@ class InvalidUsageOfVariable(Exception):
 
 class VariableIndexError(Exception):
     def __init__(self, line, name):
-        self.message = f"Line {line}: Niejawne użycie indeksu tablicy '{name}'"
+        self.message = f"Line {line}: Index of array '{name}' is a variable"
         super().__init__(self.message)
 
 

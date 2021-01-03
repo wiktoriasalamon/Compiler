@@ -12,16 +12,14 @@ def parse_arguments():
         help='.imp file containing code'
     )
     parser.add_argument(
-        '--outfile',
+        'outfile',
         type=argparse.FileType('w'),
         help='output file for compilation results',
-        default='a.out'
     )
     return parser.parse_args()
 
 
 def start_compiler(input_file, output_file):
-    print(input_file, output_file)
     lexer = CompilerLexer()
 
     with open(input_file, 'r') as file:

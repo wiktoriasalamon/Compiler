@@ -1,6 +1,6 @@
 from sly import Parser
 from lexer import CompilerLexer
-from helpers import *
+from compiler_classes import *
 from exceptions import InvalidCharacter
 
 

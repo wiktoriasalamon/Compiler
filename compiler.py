@@ -1,6 +1,6 @@
 import re
 
-from helpers import *
+from compiler_classes import *
 import code_generator as g
 from exceptions import *
 
@@ -326,14 +326,11 @@ class Compiler:
         return code
 
     def for_to_loop(self, command: ForTo):
-        print(command)
-
-        # count iterations
-        print('iterations end')
+        # end of iterations
         end_for_name = command.iterator.id + '_end'
         end_for_var = Var(end_for_name, command.line)
         self.declare_variable(end_for_var)
-        # end_for = end
+        # end_for = command.end
         code = self.assign(
             Assign(
                 end_for_var,
@@ -341,21 +338,22 @@ class Compiler:
                 command.line
             )
         )
-
-        print('iterator', command.iterator, type(command.iterator))
-        iterator_id = self.add_iterator(command.iterator)
+        # iterator = command.start
+        self.add_iterator(command.iterator)
         iterator = self.get_variable(command.iterator)
+        code += self.assign(
+            Assign(
+                iterator,
+                command.start,
+                command.line
+            )
+        )
 
-        # assign 'start' to iterator
-        code += self.assign(Assign(iterator, command.start, command.line))
-
-        print('commands')
         commands_code = ''
         for c in command.commands:
             commands_code += self.walk_tree(c)
 
         # increase iterator by 1 and save it
-        print('increasing')
         increasing_code = ''
         increasing_code += self.load_var_to_register(iterator, 'f', 'e')
         increasing_code += g.increase('f')
@@ -364,11 +362,6 @@ class Compiler:
         increasing_code += g.save_val('e', 'f')
 
         # check if iterator <= end
-        # but i want to jump if zero
-        # and true is 1
-        # so i have to check if iterator > end
-        # results of condition in reg a
-        print('condition')
         condition_code = self.condition(
             Condition(
                 iterator,
@@ -382,26 +375,24 @@ class Compiler:
         commands_lines = count_commands(commands_code)
         condition_lines = count_commands(condition_code)
 
-        print('sklejanie kodu. 4...')
         code += condition_code
-        print('3..')
         code += g.jump_if_zero('a', commands_lines + increasing_lines + 2)
         code += commands_code
-        print('2..')
         code += increasing_code
-        print('1..')
         code += g.jump(-(increasing_lines + commands_lines + condition_lines + 1))
 
         self.delete_iterator(iterator)
         self.delete_iterator(end_for_var)
+
         print(command)
         return code
 
     def for_downto_loop(self, command: ForDownTo):
-        # count iterations
+        # end of iterations
         end_for_name = command.iterator.id + '_end'
         end_for_var = Var(end_for_name, command.line)
         self.declare_variable(end_for_var)
+
         # end_for = end + 1
         code = self.assign(
             Assign(
@@ -416,8 +407,7 @@ class Compiler:
             )
         )
 
-        print('iterator', command.iterator, type(command.iterator))
-        iterator_id = self.add_iterator(command.iterator)
+        self.add_iterator(command.iterator)
         iterator = self.get_variable(command.iterator)
 
         # iterator = start + 1
@@ -434,13 +424,11 @@ class Compiler:
             )
         )
 
-        print('commands')
         commands_code = ''
         for c in command.commands:
             commands_code += self.walk_tree(c)
 
         # decrease iterator by 1 and save it
-        print('decreasing')
         decreasing_code = ''
         decreasing_code += self.load_var_to_register(iterator, 'f', 'e')
         decreasing_code += g.decrease('f', 'e')
@@ -449,11 +437,6 @@ class Compiler:
         decreasing_code += g.save_val('e', 'f')
 
         # check if iterator >= end
-        # but i want to jump if zero
-        # and true is 1
-        # so i have to check if iterator > end
-        # results of condition in reg a
-        print('condition')
         condition_code = self.condition(
             Condition(
                 iterator,
@@ -467,18 +450,15 @@ class Compiler:
         commands_lines = count_commands(commands_code)
         condition_lines = count_commands(condition_code)
 
-        print('sklejanie kodu. 4...')
         code += condition_code
-        print('3..')
         code += g.jump_if_zero('a', commands_lines + decreasing_lines + 2)
-        print('2..')
         code += decreasing_code
-        print('1..')
         code += commands_code
         code += g.jump(-(decreasing_lines + commands_lines + condition_lines + 1))
 
         self.delete_iterator(iterator)
         self.delete_iterator(end_for_var)
+
         print(command)
         return code
 
@@ -505,7 +485,7 @@ class Compiler:
 
         if isinstance(var, ArrElem):
             if isinstance(var.index, Var):
-                raise VariableIndexError(var.line, var.arr_name)  # TODO ????????? robie to w innym miejscu
+                raise VariableIndexError(var.line, var.arr_name)  # for this case you should use get_memory_cell_to_reg
             else:
                 elem_id = int(var.index)
                 arr = self.get_variable(var)
@@ -554,7 +534,6 @@ class Compiler:
 
         # covering other variable
         if var.id in self.variables:
-            print('dodaje nowy iterator')
             var_to_cover: Var = self.get_variable(var)
             var_to_cover.is_covered = True
             var.id = "#" + var_to_cover.id
@@ -563,19 +542,14 @@ class Compiler:
 
         self.declare_variable(var)
 
-        return var.id  # TODO może ni emusze tego zwracac
-
     def delete_iterator(self, var: Var):
-        print('usuwanie iteratora')
-
         var_to_delete = self.get_variable(var)
-        print('chce usunac to ', var_to_delete)
+
         if var_to_delete.var_covered is not None:
             var_covered = self.get_variable(var_to_delete.var_covered)
-            print('ale najpierw musze zmodyfikowac to ', var_covered)
             var_covered.var_covering = None
             var_covered.is_covered = False
-        print('usuwanko')
+
         self.variables.pop(var_to_delete.id)
         self.mem_indexes.pop(var_to_delete.id)
 
@@ -584,7 +558,3 @@ class Compiler:
                 var.var_covering is None:
             return var
         return self.get_covering_var(var.var_covering)
-
-    def increase_var(self):
-        # TODO
-        pass

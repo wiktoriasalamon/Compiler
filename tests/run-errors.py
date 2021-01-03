@@ -1,5 +1,4 @@
-import os
-from run import start_compiler
+from kompilator import start_compiler
 
 
 class bcolors:
@@ -19,14 +18,14 @@ files = [
     ('error1.imp', True),
     ('error2.imp', True),
     ('error3.imp', True),
-    ('error4.imp', True),  # TODO parser/lekser
+    ('error4.imp', True),
     ('error5.imp', True),
-    ('error6.imp', True),  # ??? my mamy niezadeklarowaną zmienną
-    ('error7.imp', True),  # podobnie jw
-    ('error8.imp', True)  # TODO (for)
+    ('error6.imp', True),
+    ('error7.imp', True),
+    ('error8.imp', True)
 ]
 
-gotfryd = [
+files_lab = [
     ('error1.imp', True),
     ('error2.imp', True),
     ('error3.imp', True),
@@ -68,18 +67,11 @@ def print_separator(title):
     print('##################')
 
 
-def main():
-    with open('my-results.txt', 'w') as f:
-        print_separator('TESTS')
-        run_test(files, f, 'examples/')
-
-        print_separator('GOTFRYD')
-        run_test(gotfryd, f, 'examples/tests/gotfryd/')
-
+def count_passed_tests(my_results_file, results_file):
     points = 0
     max_points = 0
-    with open('my-results.txt', 'r') as f1:
-        with open('examples/results.txt', 'r') as f2:
+    with open(my_results_file, 'r') as f1:
+        with open(results_file, 'r') as f2:
             lines1 = f1.readlines()
             lines2 = f2.readlines()
             for i in range(0, len(lines2)):
@@ -88,6 +80,19 @@ def main():
                     points += 1
 
     print(f"{bcolors.OKBLUE}Passed tests: {points}/{max_points}{bcolors.ENDC}")
+
+
+def main():
+    my_results_file = 'tests/my-results.txt'
+    results_file = 'tests/results.txt'
+    with open(my_results_file, 'w') as f:
+        print_separator('TESTS')
+        run_test(files, f, 'programs/examples')
+
+        print_separator('TESTS-LAB')
+        run_test(files_lab, f, 'programs/tests_lab/')
+
+    count_passed_tests(my_results_file, results_file)
 
 
 if __name__ == "__main__":
