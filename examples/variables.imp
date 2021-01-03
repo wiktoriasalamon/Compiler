@@ -1,7 +1,0 @@
-DECLARE
-    n,p
-BEGIN
-    n:=29; [READ n]
-    p:=n+3;
-    WRITE p;
-END

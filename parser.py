@@ -1,6 +1,7 @@
 from sly import Parser
 from lexer import CompilerLexer
-from helpers import *
+from compiler_classes import *
+from exceptions import InvalidCharacter
 
 
 class CompilerParser(Parser):
@@ -30,7 +31,6 @@ class CompilerParser(Parser):
     @_('declarations COMMA PIDENTIFIER LEFT_PAREN NUMBER COLON NUMBER RIGHT_PAREN')
     def declarations(self, p):
         p[0] = list(p[0]) if p[0] else []
-        # TODO: check indexes
         p[0].append(Arr(p[2], p.lineno, p[4], p[6]))
         return p[0]
 
@@ -40,7 +40,6 @@ class CompilerParser(Parser):
 
     @_('PIDENTIFIER LEFT_PAREN NUMBER COLON NUMBER RIGHT_PAREN')
     def declarations(self, p):
-        # TODO: check indexes
         return list((Arr(p[0], p.lineno, p[2], p[4]),))
 
     # ---------------- COMMANDS ----------------
@@ -63,27 +62,39 @@ class CompilerParser(Parser):
 
     @_('IF condition THEN commands ELSE commands ENDIF')
     def command(self, p):
-        return ["if", p[1], 'then', p[3], 'else', p[5], 'endif']
+        return IfThenElse(p[1], p[3], p[5], p.lineno)
 
     @_('IF condition THEN commands ENDIF')
     def command(self, p):
-        return ["if", p[1], 'then', p[3], 'endif']
+        return IfThen(p[1], p[3], p.lineno)
 
     @_('WHILE condition DO commands ENDWHILE')
     def command(self, p):
-        return ["while", p[1], 'do', p[3], 'endwhile']
+        return While(p[1], p[3], p.lineno)
 
     @_('REPEAT commands UNTIL condition SEMICOLON')
     def command(self, p):
-        return ["repeat", p[1], 'until', p[3], ';']
+        return Repeat(p[3], p[1], p.lineno)
 
     @_('FOR PIDENTIFIER FROM value TO value DO commands ENDFOR')
     def command(self, p):
-        return ["for", p[1], 'from', p[3], "to", p[5], 'do', p[7], 'endfor']
+        return ForTo(
+            Var(p[1], p.lineno),
+            p[3],
+            p[5],
+            p[7],
+            p.lineno
+        )
 
     @_('FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR')
     def command(self, p):
-        return ["for", p[1], 'from', p[3], "downto", p[5], 'do', p[7], 'endfor']
+        return ForDownTo(
+            Var(p[1], p.lineno),
+            p[3],
+            p[5],
+            p[7],
+            p.lineno
+        )
 
     @_('READ identifier SEMICOLON')
     def command(self, p):
@@ -110,28 +121,13 @@ class CompilerParser(Parser):
     # ---------------- CONDITION ----------------
 
     @_('value EQUALS value')
-    def condition(self, p):
-        return [p[0], '=', p[2]]
-
     @_('value NOT_EQUALS value')
-    def condition(self, p):
-        return [p[0], '!=', p[2]]
-
     @_('value LESS_THAN value')
-    def condition(self, p):
-        return [p[0], '<', p[2]]
-
     @_('value GREATER_THAN value')
-    def condition(self, p):
-        return [p[0], '>', p[2]]
-
     @_('value LESS_EQUALS value')
-    def condition(self, p):
-        return [p[0], '<=', p[2]]
-
     @_('value GREATER_EQUALS value')
     def condition(self, p):
-        return [p[0], '>=', p[2]]
+        return Condition(p[0], p[1], p[2], p.lineno)
 
     # ---------------- VALUE ----------------
 
@@ -147,12 +143,15 @@ class CompilerParser(Parser):
 
     @_('PIDENTIFIER')
     def identifier(self, p):
-        return p[0]
+        return Var(p[0], p.lineno)
 
     @_('PIDENTIFIER LEFT_PAREN PIDENTIFIER RIGHT_PAREN')
     def identifier(self, p):
-        return [p[0], p[2]]
+        return ArrElem(p[0], p.lineno, Var(p[2], p.lineno))
 
     @_('PIDENTIFIER LEFT_PAREN NUMBER RIGHT_PAREN')
     def identifier(self, p):
-        return [p[0], p[2]]
+        return ArrElem(p[0], p.lineno, p[2])
+
+    def error(self, p):
+        raise InvalidCharacter(p.lineno, p.value)
