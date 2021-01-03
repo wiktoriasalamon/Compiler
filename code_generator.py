@@ -121,14 +121,26 @@ def modulo(reg1, reg2, reg3, reg4, reg5):
 
 
 def multiply(reg1, reg2, reg3):
-    code = f"RESET {reg3}\n" \
-                 f"JODD {reg2} 2\n" \
-                 f"JUMP 2\n" \
-                 f"ADD {reg3} {reg1}" \
-                 f"SHL {reg1}\n" \
-                 f"SHR {reg2}\n" \
-                 f"JZERO {reg2} 2\n" \
-                 f"JUMP -6\n"
+    code = f"RESET {reg3} \n" \
+           f"ADD {reg3} {reg1} \n" \
+           f"INC {reg3} \n" \
+           f"SUB {reg3} {reg2} \n" \
+           f"JZERO {reg3} 2 \n" \
+           f"JUMP 7 \n" \
+           f"RESET {reg3} \n" \
+           f"ADD {reg3} {reg2}" \
+           f"RESET {reg2} \n" \
+           f"ADD {reg2} {reg1} \n" \
+           f"RESET {reg1} \n" \
+           f"ADD {reg1} {reg3} \n" \
+           f"RESET {reg3}" \
+             f"JODD {reg2} 2\n" \
+             f"JUMP 2\n" \
+             f"ADD {reg3} {reg1}" \
+             f"SHL {reg1}\n" \
+             f"SHR {reg2}\n" \
+             f"JZERO {reg2} 2\n" \
+             f"JUMP -6\n"
     code += copy(reg3, reg1)
     return code
 

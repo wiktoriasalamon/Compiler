@@ -214,13 +214,17 @@ class Compiler:
             code += g.gen_const('b', self.mem_indexes[PUT_MEMORY_CELL])
             code += g.save_val('b', 'a')
             code += g.write('b')
-
+        elif isinstance(command.value, ArrElem) \
+                and isinstance(command.value.index, Var):
+            code += self.get_memory_cell_to_reg(command.value, 'a', 'b')
+            code += g.write('a')
         elif isinstance(command.value, Var) \
                 or isinstance(command.value, ArrElem):
             mem_index = self.get_mem_index(command.value)
             code += g.gen_const('a', mem_index)
             code += g.write('a')
-            print(command)
+
+        print(command)
         return code
 
     def condition(self, cond: Condition):
@@ -389,6 +393,7 @@ class Compiler:
         code += g.jump(-(increasing_lines + commands_lines + condition_lines + 1))
 
         self.delete_iterator(iterator)
+        self.delete_iterator(end_for_var)
         print(command)
         return code
 
@@ -473,6 +478,7 @@ class Compiler:
         code += g.jump(-(decreasing_lines + commands_lines + condition_lines + 1))
 
         self.delete_iterator(iterator)
+        self.delete_iterator(end_for_var)
         print(command)
         return code
 
