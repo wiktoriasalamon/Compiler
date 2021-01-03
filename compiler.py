@@ -52,7 +52,7 @@ class Compiler:
             code += self.declare_variable(node)
 
         if isinstance(node, Assign):
-            code += self.assign(node)
+            code += self.assign_to_var(node)
 
         if isinstance(node, Read):
             code += self.read(node)
@@ -125,6 +125,7 @@ class Compiler:
 
     def assign(self, command: Assign):
         code = ''
+
         # save expr in register 'a'
         if isinstance(command.expr, BinaryOp):
             # assign expression to variable
@@ -161,7 +162,16 @@ class Compiler:
         self.initialize_var(command.var)
 
         print(command)
+
         return code
+
+    def assign_to_var(self, command: Assign):
+        var = self.get_variable(command.var)
+
+        if isinstance(var, Var):
+            if not var.is_global:
+                raise IteratorCannotBeModified(command.line, command.var.name)
+        return self.assign(command)
 
     def expression(self, expr: BinaryOp):
         code = ''
@@ -544,7 +554,6 @@ class Compiler:
             var.id = "#" + var_to_cover.id
             var.var_covered = var_to_cover
             var.var_covering = var
-
 
         self.declare_variable(var)
 

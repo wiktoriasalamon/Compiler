@@ -22,4 +22,4 @@ error12.imp - Line 5: Invalid usage of array 'b'
 error13.imp - Line 6: Variable 'a' is not initialized
 error14.imp - Line 7: Variable 'b' is not initialized
 error15.imp - Line 6: Variable 'i' is not declared
-error16.imp - 
+error16.imp - Line 8: Iterator 'i' cannot be modified

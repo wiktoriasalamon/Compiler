@@ -56,3 +56,9 @@ class InvalidCharacter(Exception):
     def __init__(self, line, character):
         self.message = f"Line {line}: Invalid character '{character}'"
         super().__init__(self.message)
+
+
+class IteratorCannotBeModified(Exception):
+    def __init__(self, line, name):
+        self.message = f"Line {line}: Iterator '{name}' cannot be modified"
+        super().__init__(self.message)
