@@ -1,9 +1,10 @@
 DECLARE
-    i
+  a, b
 BEGIN
-    READ i;
-    REPEAT
-        WRITE i;
-        i:=i-1;
-    UNTIL i=0;
+  a := 9;
+  b := 5;
+  FOR i FROM b DOWNTO a DO
+    WRITE i;
+  ENDFOR
 END
+

@@ -28,6 +28,12 @@ class InvalidArrayRange(Exception):
         super().__init__(self.message)
 
 
+class InvalidUsageOfVariable(Exception):
+    def __init__(self, line, name, var_type):
+        self.message = f"Line {line}: Invalid usage of {var_type} '{name}'"
+        super().__init__(self.message)
+
+
 class VariableIndexError(Exception):
     def __init__(self, line, name):
         self.message = f"Line {line}: Niejawne użycie indeksu tablicy '{name}'"
@@ -43,4 +49,10 @@ class VariableNotInitialized(Exception):
 class ArrayIndexOutOfRange(Exception):
     def __init__(self, line, name):
         self.message = f"Line {line}: Index of array '{name}' is out of range"
+        super().__init__(self.message)
+
+
+class InvalidCharacter(Exception):
+    def __init__(self, line, character):
+        self.message = f"Line {line}: Invalid character '{character}'"
         super().__init__(self.message)

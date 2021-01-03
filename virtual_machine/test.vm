@@ -1,40 +1,125 @@
-(generate 1)
+(generate 0)
 RESET a
-INC a
-GET a
-(generate 1)
-RESET a
-INC a
-PUT a
-(generate 1)
-RESET a
-INC a
-LOAD a a
-(generate 1)
-RESET b
-INC b
-SUB a b
 (generate 1)
 RESET b
 INC b
 STORE a b
-(generate 1)
+(generate 100)
+RESET a
+INC a
+SHL a
+INC a
+SHL a
+SHL a
+SHL a
+INC a
+SHL a
+SHL a
+(generate 2)
 RESET b
 INC b
+SHL b
+STORE a b
+(generate 1)
+RESET a
+INC a
+(generate 3)
+RESET b
+INC b
+SHL b
+INC b
+STORE a b
+(generate 3)
+RESET b
+INC b
+SHL b
+INC b
 LOAD b b
-(generate 0)
+(generate 2)
 RESET c
+INC c
+SHL c
+LOAD c c
 RESET a
 ADD a b 
 SUB a c 
-JZERO a 2
-JUMP 5 
+JZERO a 3
 RESET a 
-ADD a c 
-SUB a b 
-JZERO a 3RESET a 
 JUMP 3 
 RESET a 
 INC a 
-JZERO a -29 
+JZERO a 63 
+(generate 1)
+RESET a
+INC a
+LOAD a a
+(generate 3)
+RESET b
+INC b
+SHL b
+INC b
+LOAD b b
+ADD a b
+(generate 1)
+RESET b
+INC b
+STORE a b
+(generate 3)
+RESET a
+INC a
+SHL a
+INC a
+LOAD a a
+(generate 2)
+RESET b
+INC b
+SHL b
+JZERO b 24 
+RESET d 
+RESET c 
+INC c 
+RESET e 
+ADD e b 
+INC e 
+SUB e a 
+JZERO e 2 
+JUMP 4 
+SHL b 
+SHL c 
+JUMP -8 
+RESET e 
+ADD e b 
+SUB e a 
+JZERO e 2 
+JUMP 3 
+SUB a b 
+ADD d c 
+SHR b 
+SHR c 
+JZERO c 3 
+JUMP -10
+RESET a(generate 3)
+RESET b
+INC b
+SHL b
+INC b
+STORE a b
+(generate 3)
+RESET f
+INC f
+SHL f
+INC f
+LOAD f f
+INC f 
+(generate 3)
+RESET e
+INC e
+SHL e
+INC e
+STORE f e
+JUMP -79 
+(generate 1)
+RESET a
+INC a
+PUT a
 HALT

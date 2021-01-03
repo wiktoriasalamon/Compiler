@@ -243,3 +243,16 @@ def jump_if_zero(reg, jump_lines):
 
 def jump(jump_lines):
     return f"JUMP {jump_lines} \n"
+
+
+def increase(reg):
+    return f"INC {reg} \n"
+
+
+def decrease(reg, help_reg):
+    code = f"RESET {help_reg} \n" \
+           f"INC {help_reg} \n" \
+
+    code += subtract(reg, help_reg)
+
+    return code

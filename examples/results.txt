@@ -1,0 +1,25 @@
+error0.imp - Line 3: Invalid range of array 'b'
+error1.imp - Line 3: Variable 'a' was already declared
+error2.imp - Line 5: Variable 'a' is not declared
+error3.imp - Line 6: Variable 'a' is not initialized
+error4.imp - Line 3: Invalid character '1'
+error5.imp - Line 5: Variable 'a' is not initialized
+error6.imp - Line 5: Invalid usage of array 'b'
+error7.imp - Line 6: Invalid usage of variable 'a'
+error8.imp - Line 8: Variable 'i' is not declared
+error1.imp - Line 3: Variable 'a' was already declared
+error2.imp - Line 5: Variable 'a' is not declared
+error3.imp - Line 6: Variable 'a' is not initialized
+error4.imp - Line 3: Invalid character '1'
+error5.imp - Line 5: Variable 'a' is not initialized
+error6.imp - Line 5: Invalid character '-'
+error7.imp - Line 3: Invalid character '-'
+error8.imp - Line 3: Invalid range of array 'b'
+error9.imp - Line 6: Invalid usage of variable 'a'
+error10.imp - Line 8: Variable 'i' is not declared
+error11.imp - Line 3: Invalid character ')'
+error12.imp - Line 5: Invalid usage of array 'b'
+error13.imp - Line 6: Variable 'a' is not initialized
+error14.imp - Line 7: Variable 'b' is not initialized
+error15.imp - Line 6: Variable 'i' is not declared
+error16.imp - modyfikacja iteratora w petli # TODO  FOr

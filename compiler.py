@@ -20,13 +20,11 @@ class Compiler:
 
     def __init__(self, tree):
         self.variables = {}
-        self.arrays = {}
-        self.var_mem_indexes = {}
-        self.arr_mem_indexes = {}
+        self.mem_indexes = {}
         self.next_free_memory_index = 0
         self.tree = tree
 
-        self.var_mem_indexes[PUT_MEMORY_CELL] = self.next_free_memory_index
+        self.mem_indexes[PUT_MEMORY_CELL] = self.next_free_memory_index
         self.next_free_memory_index += 1
 
     def compile(self):
@@ -74,42 +72,56 @@ class Compiler:
         if isinstance(node, Repeat):
             code += self.repeat_loop(node)
 
+        if isinstance(node, ForTo):
+            code += self.for_to_loop(node)
+
+        if isinstance(node, ForDownTo):
+            code += self.for_downto_loop(node)
+
         return code
 
     def declare_variable(self, var):
-        if isinstance(var, Var):
-            if var.name in self.variables:
-                raise VariableAlreadyDeclared(var.line, var.name)
+        if var.id in self.variables:
+            raise VariableAlreadyDeclared(var.line, var.name)
 
-            self.variables[var.name] = var
-            self.var_mem_indexes[var.name] = self.next_free_memory_index
+        if isinstance(var, Var):
+            self.variables[var.id] = var
+            self.mem_indexes[var.id] = self.next_free_memory_index
             self.next_free_memory_index += 1
 
         elif isinstance(var, Arr):
-            if var.name in self.arrays:
-                raise ArrayAlreadyDeclared(var.line, var.name)
-
             if int(var.start) > int(var.end):
                 raise InvalidArrayRange(var.line, var.name)
 
-            self.arrays[var.name] = var
-            self.arr_mem_indexes[var.name] = self.next_free_memory_index
+            self.variables[var.id] = var
+            self.mem_indexes[var.id] = self.next_free_memory_index
             self.next_free_memory_index += var.length
 
         print('declare', var)
         return ''
 
     def get_variable(self, var):
-        if isinstance(var, Var):
-            if var.name not in self.variables:
-                raise VariableNotDeclared(var.line, var.name)
-            else:
-                return self.variables[var.name]
-        if isinstance(var, ArrElem):
-            if var.arr_name not in self.arrays:
-                raise ArrayNotDeclared(var.line, var.arr_name)
-            else:
-                return self.arrays[var.arr_name]
+        name = ''
+        if isinstance(var, Var) or isinstance(var, Arr):
+            name = var.id
+        elif isinstance(var, ArrElem):
+            name = var.arr_name
+
+        # check if variable is declared
+        if name not in self.variables:
+            raise VariableNotDeclared(var.line, name)
+
+        variable = self.variables[name]
+
+        # check invalid usage
+        if variable.type != var.type:
+            raise InvalidUsageOfVariable(var.line, name, variable.type)
+
+        # check if variable is covered
+        if isinstance(variable, Var):
+            variable = self.get_covering_var(variable)
+
+        return variable
 
     def assign(self, command: Assign):
         code = ''
@@ -173,7 +185,7 @@ class Compiler:
         code = ''
         if isinstance(command.var, ArrElem) \
                 and isinstance(command.var.index, Var):
-            var = self.get_variable(command.var)
+            var = self.get_variable(command.var.index)
             code += self.get_memory_cell_to_reg(var, 'a', 'b')
         else:
             mem_index = self.get_mem_index(command.var)
@@ -189,7 +201,7 @@ class Compiler:
         self.check_is_var_initialized(command.value)
         if isinstance(command.value, str):  # command.value is number
             code += g.gen_const('a', int(command.value))
-            code += g.gen_const('b', self.var_mem_indexes[PUT_MEMORY_CELL])
+            code += g.gen_const('b', self.mem_indexes[PUT_MEMORY_CELL])
             code += g.save_val('b', 'a')
             code += g.write('b')
 
@@ -299,6 +311,161 @@ class Compiler:
         print(command)
         return code
 
+    def for_to_loop(self, command: ForTo):
+        print(command)
+
+        # count iterations
+        print('iterations end')
+        end_for_name = command.iterator.id + '_end'
+        end_for_var = Var(end_for_name, command.line)
+        self.declare_variable(end_for_var)
+        # end_for = end
+        code = self.assign(
+            Assign(
+                end_for_var,
+                command.end,
+                command.line
+            )
+        )
+
+        print('iterator', command.iterator, type(command.iterator))
+        iterator_id = self.add_iterator(command.iterator)
+        iterator = self.get_variable(command.iterator)
+
+        # assign 'start' to iterator
+        code += self.assign(Assign(iterator, command.start, command.line))
+
+        print('commands')
+        commands_code = ''
+        for c in command.commands:
+            commands_code += self.walk_tree(c)
+
+        # increase iterator by 1 and save it
+        print('increasing')
+        increasing_code = ''
+        increasing_code += self.load_var_to_register(iterator, 'f', 'e')
+        increasing_code += g.increase('f')
+        iterator_mem_index = self.get_mem_index(iterator)
+        increasing_code += g.gen_const('e', iterator_mem_index)
+        increasing_code += g.save_val('e', 'f')
+
+        # check if iterator <= end
+        # but i want to jump if zero
+        # and true is 1
+        # so i have to check if iterator > end
+        # results of condition in reg a
+        print('condition')
+        condition_code = self.condition(
+            Condition(
+                iterator,
+                '<=',
+                end_for_var,
+                command.line
+            )
+        )
+
+        increasing_lines = count_commands(increasing_code)
+        commands_lines = count_commands(commands_code)
+        condition_lines = count_commands(condition_code)
+
+        print('sklejanie kodu. 4...')
+        code += condition_code
+        print('3..')
+        code += g.jump_if_zero('a', commands_lines + increasing_lines + 2)
+        code += commands_code
+        print('2..')
+        code += increasing_code
+        print('1..')
+        code += g.jump(-(increasing_lines + commands_lines + condition_lines + 1))
+
+        self.delete_iterator(iterator)
+        print(command)
+        return code
+
+    def for_downto_loop(self, command: ForDownTo):
+        # count iterations
+        end_for_name = command.iterator.id + '_end'
+        end_for_var = Var(end_for_name, command.line)
+        self.declare_variable(end_for_var)
+        # end_for = end + 1
+        code = self.assign(
+            Assign(
+                end_for_var,
+                BinaryOp(
+                    command.end,
+                    '+',
+                    1,
+                    command.line
+                ),
+                command.line
+            )
+        )
+
+        print('iterator', command.iterator, type(command.iterator))
+        iterator_id = self.add_iterator(command.iterator)
+        iterator = self.get_variable(command.iterator)
+
+        # iterator = start + 1
+        code += self.assign(
+            Assign(
+                iterator,
+                BinaryOp(
+                    command.start,
+                    '+',
+                    1,
+                    command.line
+                ),
+                command.line
+            )
+        )
+
+        print('commands')
+        commands_code = ''
+        for c in command.commands:
+            commands_code += self.walk_tree(c)
+
+        # decrease iterator by 1 and save it
+        print('decreasing')
+        decreasing_code = ''
+        decreasing_code += self.load_var_to_register(iterator, 'f', 'e')
+        decreasing_code += g.decrease('f', 'e')
+        iterator_mem_index = self.get_mem_index(iterator)
+        decreasing_code += g.gen_const('e', iterator_mem_index)
+        decreasing_code += g.save_val('e', 'f')
+
+        # check if iterator >= end
+        # but i want to jump if zero
+        # and true is 1
+        # so i have to check if iterator > end
+        # results of condition in reg a
+        print('condition')
+        condition_code = self.condition(
+            Condition(
+                iterator,
+                '>=',
+                end_for_var,
+                command.line
+            )
+        )
+
+        decreasing_lines = count_commands(decreasing_code)
+        commands_lines = count_commands(commands_code)
+        condition_lines = count_commands(condition_code)
+
+        print('sklejanie kodu. 4...')
+        code += condition_code
+        print('3..')
+        code += g.jump_if_zero('a', commands_lines + decreasing_lines + 2)
+        print('2..')
+        code += decreasing_code
+        print('1..')
+        code += commands_code
+        code += g.jump(-(decreasing_lines + commands_lines + condition_lines + 1))
+
+        self.delete_iterator(iterator)
+        print(command)
+        return code
+
     #  -------- helpers --------
 
     def initialize_var(self, var):
@@ -318,7 +485,7 @@ class Compiler:
     def get_mem_index(self, var):
         if isinstance(var, Var):
             v = self.get_variable(var)
-            return self.var_mem_indexes[v.name]
+            return self.mem_indexes[v.name]
 
         if isinstance(var, ArrElem):
             if isinstance(var.index, Var):
@@ -328,7 +495,7 @@ class Compiler:
                 arr = self.get_variable(var)
                 if elem_id < int(arr.start) or elem_id > int(arr.end):
                     raise ArrayIndexOutOfRange(var.line, var.arr_name)
-                arr_elem_mem_index = self.arr_mem_indexes[arr.name] + elem_id - int(arr.start)
+                arr_elem_mem_index = self.mem_indexes[arr.name] + elem_id - int(arr.start)
                 return arr_elem_mem_index
 
     def load_var_to_register(self, var, register, help_reg):
@@ -350,18 +517,59 @@ class Compiler:
         return code
 
     def get_memory_cell_to_reg(self, var: ArrElem, register, help_reg):
+        # check if variable which is used as an index of the array is declared
+        self.check_is_var_initialized(var.index)
+
         code = ''
 
-        arr_mem_index = self.arr_mem_indexes[var.arr_name]
-        arr_id_mem_index = self.var_mem_indexes[var.index.name]
+        arr_mem_index = self.mem_indexes[var.arr_name]
+        arr_id_mem_index = self.mem_indexes[var.index.name]
         code += g.gen_const(register, arr_mem_index)
         code += g.load_var(arr_id_mem_index, help_reg)
         code += g.add(register, help_reg)
-        arr_offset = self.arrays[var.arr_name].start
-        code += g. gen_const(help_reg, arr_offset)
+        arr_offset = self.variables[var.arr_name].start
+        code += g.gen_const(help_reg, arr_offset)
         code += g.subtract(register, help_reg)
 
         return code
 
+    def add_iterator(self, var: Var):
+        var.is_global = False
+
+        # covering other variable
+        if var.id in self.variables:
+            print('dodaje nowy iterator')
+            var_to_cover: Var = self.get_variable(var)
+            var_to_cover.is_covered = True
+            var.id = "#" + var_to_cover.id
+            var.var_covered = var_to_cover
+            var.var_covering = var
 
 
+        self.declare_variable(var)
+
+        return var.id  # TODO może ni emusze tego zwracac
+
+    def delete_iterator(self, var: Var):
+        print('usuwanie iteratora')
+
+        var_to_delete = self.get_variable(var)
+        print('chce usunac to ', var_to_delete)
+        if var_to_delete.var_covered is not None:
+            var_covered = self.get_variable(var_to_delete.var_covered)
+            print('ale najpierw musze zmodyfikowac to ', var_covered)
+            var_covered.var_covering = None
+            var_covered.is_covered = False
+        print('usuwanko')
+        self.variables.pop(var_to_delete.id)
+        self.mem_indexes.pop(var_to_delete.id)
+
+    def get_covering_var(self, var: Var):
+        if not var.is_covered or \
+                var.var_covering is None:
+            return var
+        return self.get_covering_var(var.var_covering)
+
+    def increase_var(self):
+        # TODO
+        pass

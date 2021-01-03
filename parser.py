@@ -1,6 +1,7 @@
 from sly import Parser
 from lexer import CompilerLexer
 from helpers import *
+from exceptions import InvalidCharacter
 
 
 class CompilerParser(Parser):
@@ -77,11 +78,23 @@ class CompilerParser(Parser):
 
     @_('FOR PIDENTIFIER FROM value TO value DO commands ENDFOR')
     def command(self, p):
-        return ["for", p[1], 'from', p[3], "to", p[5], 'do', p[7], 'endfor']
+        return ForTo(
+            Var(p[1], p.lineno),
+            p[3],
+            p[5],
+            p[7],
+            p.lineno
+        )
 
     @_('FOR PIDENTIFIER FROM value DOWNTO value DO commands ENDFOR')
     def command(self, p):
-        return ["for", p[1], 'from', p[3], "downto", p[5], 'do', p[7], 'endfor']
+        return ForDownTo(
+            Var(p[1], p.lineno),
+            p[3],
+            p[5],
+            p[7],
+            p.lineno
+        )
 
     @_('READ identifier SEMICOLON')
     def command(self, p):
@@ -139,3 +152,6 @@ class CompilerParser(Parser):
     @_('PIDENTIFIER LEFT_PAREN NUMBER RIGHT_PAREN')
     def identifier(self, p):
         return ArrElem(p[0], p.lineno, p[2])
+
+    def error(self, p):
+        raise InvalidCharacter(p.lineno, p.value)
