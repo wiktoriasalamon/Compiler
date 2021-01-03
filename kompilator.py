@@ -29,10 +29,13 @@ def start_compiler(input_file, output_file):
     parser = CompilerParser()
     tree = parser.parse(tokens)
     compiler = Compiler(tree)
-    code = compiler.compile()
+    try:
+        code = compiler.compile()
 
-    with open(output_file, 'w') as file:
-        file.write(code)
+        with open(output_file, 'w') as file:
+            file.write(code)
+    except Exception as e:
+        print(f"\033[91m{e}\033[0m")
 
 
 def main():

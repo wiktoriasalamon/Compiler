@@ -5,6 +5,7 @@ import code_generator as g
 from exceptions import *
 
 PUT_MEMORY_CELL = 'put_memory_cell'
+LOGGER = False
 
 
 def count_commands(dirty_code):
@@ -97,7 +98,9 @@ class Compiler:
             self.mem_indexes[var.id] = self.next_free_memory_index
             self.next_free_memory_index += var.length
 
-        print('declare', var)
+        if LOGGER:
+            print('declare', var)
+
         return ''
 
     def get_variable(self, var):
@@ -161,8 +164,6 @@ class Compiler:
 
         self.initialize_var(command.var)
 
-        print(command)
-
         return code
 
     def assign_to_var(self, command: Assign):
@@ -171,6 +172,10 @@ class Compiler:
         if isinstance(var, Var):
             if not var.is_global:
                 raise IteratorCannotBeModified(command.line, command.var.name)
+
+        if LOGGER:
+            print(command)
+
         return self.assign(command)
 
     def expression(self, expr: BinaryOp):
@@ -203,7 +208,9 @@ class Compiler:
         code += g.read('a')
         self.initialize_var(command.var)
 
-        print(command)
+        if LOGGER:
+            print(command)
+
         return code
 
     def write(self, command: Write):
@@ -224,7 +231,9 @@ class Compiler:
             code += g.gen_const('a', mem_index)
             code += g.write('a')
 
-        print(command)
+        if LOGGER:
+            print(command)
+
         return code
 
     def condition(self, cond: Condition):
@@ -261,7 +270,9 @@ class Compiler:
         code += g.jump_if_zero('a', commands_lines + 1)
         code += commands_code
 
-        print(command)
+        if LOGGER:
+            print(command)
+
         return code
 
     def if_then_else(self, command: IfThenElse):
@@ -285,7 +296,9 @@ class Compiler:
         code += g.jump(else_commands_lines + 1)
         code += else_commands_code
 
-        print(command)
+        if LOGGER:
+            print(command)
+
         return code
 
     def while_loop(self, command: While):
@@ -304,7 +317,9 @@ class Compiler:
         code += commands_code
         code += g.jump(-(commands_lines + condition_lines + 1))
 
-        print(command)
+        if LOGGER:
+            print(command)
+
         return code
 
     def repeat_loop(self, command: Repeat):
@@ -322,7 +337,9 @@ class Compiler:
         code += condition_code
         code += g.jump_if_zero('a', -(condition_lines + commands_lines))
 
-        print(command)
+        if LOGGER:
+            print(command)
+
         return code
 
     def for_to_loop(self, command: ForTo):
@@ -384,7 +401,9 @@ class Compiler:
         self.delete_iterator(iterator)
         self.delete_iterator(end_for_var)
 
-        print(command)
+        if LOGGER:
+            print(command)
+
         return code
 
     def for_downto_loop(self, command: ForDownTo):
@@ -459,7 +478,9 @@ class Compiler:
         self.delete_iterator(iterator)
         self.delete_iterator(end_for_var)
 
-        print(command)
+        if LOGGER:
+            print(command)
+
         return code
 
     #  -------- helpers --------
